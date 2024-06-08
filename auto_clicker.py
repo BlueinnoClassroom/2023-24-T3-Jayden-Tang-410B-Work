@@ -7,93 +7,72 @@ import multiprocessing.process
 # curtis.displayMousePosition()
 curtis.Pause = 0.01
 
-while True:
-    curtis.click()
-# curtis.PAUSE = 1
 
-# def click_capybara_task():
-#     cap_x = 999
-#     cap_y = 444
+UPGRADE_AREA_TOP = 290
+UPGRADE_AREA_BOTTOM = 570
+SCROLL_BAR_X = 1430
 
-#     try:
-#         while True:
-#             curtis.click(cap_x, cap_y)
-#     except curtis.FailSafeException:
-#         print('Fail safe triggered, exiting click capy task')
-#         return
+def click_capybara_task():
+    cap_x = 999
+    cap_y = 444
 
-# def click_upgrade_buttons_tasks():
-#     left = 840
-#     right = 1320
-#     top = 700
-#     bottom = 780
+    try:
+        while True:
+            curtis.click(cap_x, cap_y)
+    except curtis.FailSafeException:
+        print('Fail safe triggered, exiting click capy task')
+        return
 
-#     #upgrades
-#     upgx = 1266
+def click_upgrade_buttons_tasks():
+    scroll_segment = 0
+    max_scroll_segments = 4
 
-#     #top of scroll bar
-#     x1 = 1427
-#     y1 = 260
+    try:
+        btn_x = SCROLL_BAR_X - 50
+        while True:
 
-#     #bottom of scroll bar
-#     x2 = 1427
-#     y2 = 600
+            offset = scroll_segment * ((UPGRADE_AREA_BOTTOM - UPGRADE_AREA_TOP) / max_scroll_segments)
+            curtis.mouseDown(SCROLL_BAR_X, UPGRADE_AREA_TOP + offset)
+            
+            screenshot = ImageGrab.grab()
+            pixels = screenshot.load()
 
+            for y in range(UPGRADE_AREA_BOTTOM, UPGRADE_AREA_TOP, -1):
+                px = pixels[btn_x * 2, y * 2]
+                r = px[0]
+                g = px[1]
+                b = px[2]
+                if (r > 230) and (g > 230) and (b > 230):
+                    curtis.click(btn_x, y)
+            
+            scroll_segment += 1
+            if (scroll_segment > max_scroll_segments):
+                scroll_segment = 0
+            
 
-#     try:
-#         scroll_x = 1430
-#         btn_x = 1381
-#         while True:
-#             curtis.click(scroll_x,  333)
-#             curtis.click(btn_x,  321)
-#             curtis.click(btn_x,  386)
-#             curtis.click(btn_x,  448)
-#             curtis.click(btn_x,  506)
-
-#             curtis.click(scroll_x,  373)
-#             curtis.click(btn_x,  321)
-#             curtis.click(btn_x,  386)
-#             curtis.click(btn_x,  448)
-#             curtis.click(btn_x,  506)
-
-#             curtis.click(scroll_x,  457)
-#             curtis.click(btn_x,  321)
-#             curtis.click(btn_x,  386)
-#             curtis.click(btn_x,  448)
-#             curtis.click(btn_x,  506)
-
-#             curtis.click(scroll_x,  393)
+    except curtis.FailSafeException:
+        print('Fail safe triggered, exiting click_upgrade_buttons_tasks')
+        return
 
 
-#             curtis.click(scroll_x,  454)
+def main():
+    cappy_process = multiprocessing.Process(target=click_capybara_task)
+    upg_process = multiprocessing.Process(target=click_upgrade_buttons_tasks)
 
+    procesess = [
+        cappy_process,
+        upg_process,
+    ]
 
-#             curtis.click(scroll_x,  525)
+    for p in procesess:
+        p.start()
 
+    try:
+        for p in procesess:
+            p.join()
+    except KeyboardInterrupt:
+        for p in procesess:
+            p.terminate()
 
-#     except curtis.FailSafeException:
-#         print('Fail safe triggered, exiting click capy task')
-#         return
-
-
-# def main():
-#     cappy_process = multiprocessing.Process(target=click_capybara_task)
-#     upg_process = multiprocessing.Process(target=click_upgrade_buttons_tasks)
-
-#     procesess = [
-#         cappy_process,
-#         upg_process,
-#     ]
-
-#     for p in procesess:
-#         p.start()
-
-#     try:
-#         for p in procesess:
-#             p.join()
-#     except KeyboardInterrupt:
-#         for p in procesess:
-#             p.terminate()
-
-# if __name__ == '__main__':
-#     main()
+if __name__ == '__main__':
+    main()

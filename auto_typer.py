@@ -5,13 +5,13 @@ from PIL import ImageGrab
 
 curtis.displayMousePosition()
 
-left = 840
-right = 1320
-top = 700
-bottom = 780
+left = 755
+right = 1341
+top = 260
+bottom = 325
 
 FILE_NAME = 'words.png'
-
+        
 curtis.click(1000,450)
 time.sleep(2)
 
